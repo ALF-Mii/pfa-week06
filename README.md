@@ -186,11 +186,12 @@ Per-vertex deviation for the heat map is computed with
 
 ## Peer run
 
-> **DRAFT — swap in your classmate's actual name and words before submitting.**
-> Everything below is written from the real test run; edit it so it reads like
-> what they actually said to you.
+> **DRAFT — replace with Fayth's actual words before submitting.**
+> She ran this on her own machine and sent back three sentences; paste those
+> in and delete this note. The version below is a starting point written from
+> the real test run, so the facts are right even though the wording is mine.
 
-**Classmate:** _\<their name\>_
+**Classmate:** Fayth Elisa Navarro
 
 1. "I followed the README from the clone and had the QuadWrap window open with
    a cage fitted onto the sculpt in about a minute — the install steps were
