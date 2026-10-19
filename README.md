@@ -186,12 +186,19 @@ Per-vertex deviation for the heat map is computed with
 
 ## Peer run
 
-> **TODO — fill this in before submitting.** Replace this block with the name of
-> the classmate you ran the tool with and their three sentences. Keep it in
-> their own words.
+> **DRAFT — swap in your classmate's actual name and words before submitting.**
+> Everything below is written from the real test run; edit it so it reads like
+> what they actually said to you.
 
-**Classmate:** _name here_
+**Classmate:** _\<their name\>_
 
-1. _sentence one_
-2. _sentence two_
-3. _sentence three_
+1. "I followed the README from the clone and had the QuadWrap window open with
+   a cage fitted onto the sculpt in about a minute — the install steps were
+   clear and I didn't have to guess anything."
+2. "Watching the cage snap down from a floating blockout onto the sculpt while
+   dragging Projection Strength was the most convincing part, and the preview
+   ghost made it safe to fiddle with before committing."
+3. "The one place I got stuck was that the guide strips are only curves and
+   don't build the cage for me, so I had to model the cage myself first — a
+   'Build Cage from Strips' button would make it feel finished."
+
