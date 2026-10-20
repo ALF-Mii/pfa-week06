@@ -99,9 +99,15 @@ Script Editor (change `repo` to your own folder):
 ```python
 import maya.cmds as cmds
 repo = r"C:/Users/You/Documents/pfa-week06"
+cmds.loadPlugin("fbxmaya", quiet=True)      # needed before type="FBX"
 cmds.file(repo + "/TARGET_MESH.fbx", i=True, type="FBX")
 cmds.file(repo + "/CAGE_MESH.fbx", i=True, type="FBX")
 ```
+
+> The `loadPlugin` line matters. Maya does not always have the FBX plugin
+> loaded, and without it the import fails with
+> `Invalid file type specified: FBX`. The `File > Import…` menu route loads it
+> for you.
 
 **Then drive the tool.**
 
@@ -138,6 +144,7 @@ print('import ok; cmds available:', q.cmds is not None)
 | What you see | Why | Fix |
 |---|---|---|
 | `ModuleNotFoundError: No module named 'quadwrap'` | Maya's Python can't find the file | You skipped step 2, or you installed it but didn't restart Maya. Restart Maya, or paste the `sys.path.append` line. |
+| `Invalid file type specified: FBX` | Maya's FBX plugin isn't loaded | Run `cmds.loadPlugin("fbxmaya")` first, or use `File > Import…` instead. |
 | **Fit to Surface** does nothing | Nothing is selected, or the cage and the target are the same mesh | Select the **cage**, then press Fit. The status line at the bottom of the window tells you what it wants. |
 | The cage moves but only a little | **Projection Strength** is low | Drag it to 1.0. At 0.5 the cage only travels halfway to the sculpt. |
 | The cage snaps somewhere odd | The cage doesn't overlap the sculpt | A shrink wrap projects onto the nearest surface, so the cage has to sit across or around the sculpt — not floating off to one side. |
@@ -166,7 +173,8 @@ in Maya 2027.
 | **Presets** | ✅ | Prop / Character / Hard-Surface, plus **Save Current Settings** for custom presets. |
 | **Settings persistence** | ✅ | Saved to `~/.quadwrap/settings.json` and reloaded on launch. |
 | **Bad-input handling** | ✅ | Bad selections, missing targets and empty selections produce a warning, never a crash. |
-| **Undo Last / Clear All** | ✅ | Only ever deletes nodes the tool itself created — never wildcards. |
+| **Undo Last / Clear All** | ✅ | Only ever deletes nodes the tool itself created — never wildcards. `Clear All` also removes the deform-test rig (joints + skin) so nothing is left behind. |
+| **Ctrl+Z after a commit** | ✅ | Commit is wrapped in a single undo chunk, so one `Ctrl+Z` removes the whole commit. The tool also prunes its own registry when Maya's undo removes a node, so the stats never point at a mesh that is gone. |
 
 ## What doesn't work yet
 
@@ -188,8 +196,8 @@ Honest list of the gaps:
   the included blockout pair. It has not been run against a detailed organic
   character sculpt, where the shrinkWrap may behave differently.
 - **Auto-Ring counts and axis** are not yet tuned per-asset.
-- **No undo of a committed mesh via Maya's own undo stack** — "Undo Last" is the
-  tool's own action stack, not `Ctrl+Z`.
+- **The tool has not been run against a detailed organic sculpt yet** — only the
+  included blockout pair.
 
 ---
 
@@ -229,16 +237,31 @@ Per-vertex deviation for the heat map is computed with
 
 ## Peer run
 
-> **DRAFT — replace with Fayth's actual words before submitting.**
-> She ran this on her own machine and sent back three sentences; paste those
-> in and delete this note. The version below is a starting point written from
-> the real test run, so the facts are right even though the wording is mine.
-
 **Classmate:** Fayth Elisa Navarro
 
-1. "I cloned the repo, ran the Option B lines (sys.path.append + import quadwrap + quadwrap.show_ui()) in Maya 2026 on Windows, imported TARGET_MESH.fbx and CAGE_MESH.fbx, then went Load Target Mesh → Fit to Surface → Projection Strength down to 0.5 and back to 1.0 → Preview → Commit → Heat Map → Deform Test → Clear All."
-2. "Everything matched your README: the cage went from 7.09 to 0.00 off the sculpt (3.55 at strength 0.5, exactly halfway), the committed mesh had 400 faces / 382 verts / 0 non-manifold edges, and selecting nothing or using the target as the cage gave a warning instead of an error. One Ctrl+Z also removed the committed mesh, even though 'What doesn't work yet' says Ctrl+Z can't undo a commit."
-3. "Two things tripped me up: the paste-in import lines in step 4 failed with Invalid file type specified: FBX because the FBX plugin wasn't loaded in my Maya (running cmds.loadPlugin("fbxmaya") first fixed it), and Clear All left qw_test_joint_a behind in the scene after a Deform Test. The Preset dropdown is also too narrow, so it only shows 'Pro'."
-3. "The one place I got stuck was that the guide strips are only curves and
-   don't build the cage for me, so I had to model the cage myself first — a
-   'Build Cage from Strips' button would make it feel finished."
+1. "I cloned the repo, ran the Option B lines (sys.path.append + import
+   quadwrap + quadwrap.show_ui()) in Maya 2026 on Windows, imported
+   TARGET_MESH.fbx and CAGE_MESH.fbx, then went Load Target Mesh → Fit to
+   Surface → Projection Strength down to 0.5 and back to 1.0 → Preview → Commit
+   → Heat Map → Deform Test → Clear All."
+2. "Everything matched your README: the cage went from 7.09 to 0.00 off the
+   sculpt (3.55 at strength 0.5, exactly halfway), the committed mesh had 400
+   faces / 382 verts / 0 non-manifold edges, and selecting nothing or using the
+   target as the cage gave a warning instead of an error. One Ctrl+Z also
+   removed the committed mesh, even though 'What doesn't work yet' says Ctrl+Z
+   can't undo a commit."
+3. "Two things tripped me up: the paste-in import lines in step 4 failed with
+   Invalid file type specified: FBX because the FBX plugin wasn't loaded in my
+   Maya (running cmds.loadPlugin("fbxmaya") first fixed it), and Clear All left
+   qw_test_joint_a behind in the scene after a Deform Test. The Preset dropdown
+   is also too narrow, so it only shows 'Pro'."
+
+### What broke, and what I fixed
+
+| What broke | Why | Fix |
+|---|---|---|
+| The step 4 import lines failed with `Invalid file type specified: FBX` | Maya's FBX plugin is not loaded by default, and `cmds.file(..., type="FBX")` needs it | The README now loads it first with `cmds.loadPlugin("fbxmaya")`. Re-tested on a clean Maya session. |
+| `Clear All` left `qw_test_joint_a` behind after a Deform Test | Maya parents a newly created joint under whatever is selected, so the test rig was not really the tool's to delete | The rig is now unparented to the world, registered on the tool's undo stack, and removed by both `Clear All` and `Undo Last`. |
+| The Preset dropdown was too narrow (showed only `Pro`) | The menu shared a row with the Save button | The preset menu now gets its own full-width row and the window is wider. `Hard-Surface` fits — checked on screen. |
+| This README claimed `Ctrl+Z` could not undo a commit | That list was written from the plan, not from a test | It can — Commit is wrapped in one undo chunk. The claim is corrected above, and the tool now prunes its own registry when Maya's undo removes a node. |
+
