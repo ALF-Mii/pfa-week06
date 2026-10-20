@@ -169,7 +169,7 @@ in Maya 2027.
 | **Commit** | ✅ | Bakes the projected shape to real geometry in **one undo step**. Topology preserved exactly: **400 faces / 382 verts / 0 non-manifold edges**. |
 | **Heat map (deviation)** | ✅ | Per-vertex distance to the target surface → green→red vertex colours. Reports the worst drift. |
 | **Deform test** | ✅ | Binds the committed cage to two test joints and bends them 45° so you can inspect the loops. |
-| **Guide strips** | ✅ | Select 2+ vertices **in order** → **Draw Strip** makes a curve along them. **Close Loop**, **Auto-Ring** (radial duplicates) and **Mirror** all work. |
+| **Guide strips** | ✅ | Select 2+ vertices **in order** → **Draw Strip** makes a curve through them, every control point exactly on the surface (deviation 0.0000). **Close Loop**, **Auto-Ring** (count from the Density slider) and **Mirror** (X by default, with a working Symmetry Blend) all work. |
 | **Presets** | ✅ | Prop / Character / Hard-Surface, plus **Save Current Settings** for custom presets. |
 | **Settings persistence** | ✅ | Saved to `~/.quadwrap/settings.json` and reloaded on launch. |
 | **Bad-input handling** | ✅ | Bad selections, missing targets and empty selections produce a warning, never a crash. |
@@ -217,6 +217,28 @@ touched — Commit bakes it out.
 
 Per-vertex deviation for the heat map is computed with
 `maya.api.OpenMaya.MFnMesh.getClosestPoint()` against the target surface.
+
+### Guide strips
+
+A guide strip is a **reference curve** that marks where a loop should go. It is
+a degree-1 polyline, so it passes exactly through the points you picked — every
+control point sits on the sculpt surface (measured deviation: **0.0000**).
+
+| Button | What it does |
+|---|---|
+| **Draw Strip** | Select 2+ vertices **in order** on the mesh → makes a curve through their world positions. |
+| **Close Loop** | Turns the open strip into a closed loop. |
+| **Auto-Ring** | Copies the strip around the mirror axis. The count comes from **Density** (`Density × 4`, minimum 3). |
+| **Mirror** | Reflects the strip across the mirror axis (X by default). |
+
+**Symmetry Blend** sets how hard the mirror applies: `0` leaves the strip alone,
+`1` is a full reflection, and `0.5` is flat on the mirror plane. That midpoint
+is not a bug — a reflection blends *through* its own plane, so half-way
+between a shape and its mirror is the flattened shape.
+
+Strips are guides, not geometry: the tool does **not** loft them into a cage.
+You use them to plan where the loops go, then model the cage along them and fit
+that cage with **Fit to Surface**.
 
 ---
 
