@@ -196,8 +196,6 @@ Honest list of the gaps:
   the included blockout pair. It has not been run against a detailed organic
   character sculpt, where the shrinkWrap may behave differently.
 - **Auto-Ring counts and axis** are not yet tuned per-asset.
-- **The tool has not been run against a detailed organic sculpt yet** — only the
-  included blockout pair.
 
 ---
 
