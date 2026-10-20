@@ -236,13 +236,9 @@ Per-vertex deviation for the heat map is computed with
 
 **Classmate:** Fayth Elisa Navarro
 
-1. "I followed the README from the clone and had the QuadWrap window open with
-   a cage fitted onto the sculpt in about a minute — the install steps were
-   clear and I didn't have to guess anything."
-2. "Watching the cage snap down from a floating blockout onto the sculpt while
-   dragging Projection Strength was the most convincing part, and the preview
-   ghost made it safe to fiddle with before committing."
+1. "I cloned the repo, ran the Option B lines (sys.path.append + import quadwrap + quadwrap.show_ui()) in Maya 2026 on Windows, imported TARGET_MESH.fbx and CAGE_MESH.fbx, then went Load Target Mesh → Fit to Surface → Projection Strength down to 0.5 and back to 1.0 → Preview → Commit → Heat Map → Deform Test → Clear All."
+2. "Everything matched your README: the cage went from 7.09 to 0.00 off the sculpt (3.55 at strength 0.5, exactly halfway), the committed mesh had 400 faces / 382 verts / 0 non-manifold edges, and selecting nothing or using the target as the cage gave a warning instead of an error. One Ctrl+Z also removed the committed mesh, even though 'What doesn't work yet' says Ctrl+Z can't undo a commit."
+3. "Two things tripped me up: the paste-in import lines in step 4 failed with Invalid file type specified: FBX because the FBX plugin wasn't loaded in my Maya (running cmds.loadPlugin("fbxmaya") first fixed it), and Clear All left qw_test_joint_a behind in the scene after a Deform Test. The Preset dropdown is also too narrow, so it only shows 'Pro'."
 3. "The one place I got stuck was that the guide strips are only curves and
    don't build the cage for me, so I had to model the cage myself first — a
    'Build Cage from Strips' button would make it feel finished."
-
