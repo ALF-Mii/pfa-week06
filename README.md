@@ -109,18 +109,21 @@ cmds.file(repo + "/CAGE_MESH.fbx", i=True, type="FBX")
 > `Invalid file type specified: FBX`. The `File > Import…` menu route loads it
 > for you.
 
-**Then drive the tool.**
+**Then drive the tool.** The window is numbered — follow it top to bottom.
 
 1. Select **TARGET_MESH** in the viewport → click **Load Target Mesh**.
    The label should now read `target: TARGET_MESH`.
-2. Select **CAGE_MESH** → click **Fit to Surface**.
-   The cage snaps down onto the sculpt, live.
-3. Drag **Projection Strength** left and right — the cage follows in real time.
-4. **Preview** → a ghost/reference copy of the fitted cage.
-5. **Commit** → bakes it to real geometry in one undo step.
-6. **Heat Map (deviation)** → colours the cage green→red by how far it is from
+2. In **2 Cage**, leave the dropdown on **Prop** and click **Create Base Cage**.
+   The tool makes a starting cage sized to your sculpt — you don't need a
+   cage of your own to get started. (Or select any mesh and click
+   **Use Selected as Cage** to use your own.)
+3. Click **Fit to Surface**. The cage snaps down onto the sculpt, live.
+4. Drag **Projection Strength** left and right — the cage follows in real time.
+5. **Preview** → a ghost/reference copy of the fitted cage.
+6. **Commit** → bakes it to real geometry in one undo step.
+7. **Heat Map (deviation)** → colours the cage green→red by how far it is from
    the sculpt.
-7. **Deform Test (skin)** → binds the result to two test joints and bends them
+8. **Deform Test (skin)** → binds the result to two test joints and bends them
    so you can judge whether the loops hold up.
 
 Expected result: the cage's distance from the sculpt goes from **7.09** to
@@ -169,6 +172,8 @@ in Maya 2027.
 | **Commit** | ✅ | Bakes the projected shape to real geometry in **one undo step**. Topology preserved exactly: **400 faces / 382 verts / 0 non-manifold edges**. |
 | **Heat map (deviation)** | ✅ | Per-vertex distance to the target surface → green→red vertex colours. Reports the worst drift. |
 | **Deform test** | ✅ | Binds the committed cage to two test joints and bends them 45° so you can inspect the loops. |
+| **Base cages** | ✅ | Generates a starting cage sized to the loaded target: **Prop** (24 quads), **Hard-Surface** (26, chamfered) and **Human** (136, a real T-pose silhouette). No extra asset files — everything is built in Maya. |
+| **Guided workflow** | ✅ | The window is numbered 1–5 with a "Getting started" panel. Fit falls back to the last cage, so you never have to re-pick a mesh. "Use Selected as Cage" accepts your own cage. |
 | **Guide strips** | ✅ | Select 2+ vertices **in order** → **Draw Strip** makes a curve through them, every control point exactly on the surface (deviation 0.0000). **Close Loop**, **Auto-Ring** (count from the Density slider) and **Mirror** (X by default, with a working Symmetry Blend) all work. |
 | **Presets** | ✅ | Prop / Character / Hard-Surface, plus **Save Current Settings** for custom presets. |
 | **Settings persistence** | ✅ | Saved to `~/.quadwrap/settings.json` and reloaded on launch. |
@@ -180,6 +185,9 @@ in Maya 2027.
 
 Honest list of the gaps:
 
+- **Base cages are blockouts, not finished cages.** They are deliberately
+  simple so you can shrink wrap them and then cut them down. There is no
+  "build a production cage from the base" yet.
 - **No auto-meshing from strips.** Guide strips are *reference curves* that mark
   where loops should go; they are not lofted into a cage for you. You still
   model the cage yourself and use the tool to fit it.
@@ -217,6 +225,26 @@ touched — Commit bakes it out.
 
 Per-vertex deviation for the heat map is computed with
 `maya.api.OpenMaya.MFnMesh.getClosestPoint()` against the target surface.
+
+### Base cages
+
+You do not need a cage to start. The tool can make you one, sized to whatever
+target you loaded:
+
+| Base cage | What it is | Quads |
+|---|---|---|
+| **Prop** | A subdivided cube that encloses the sculpt | 24 |
+| **Hard-Surface** | A chamfered box — the right starting shape for panels and props | 26 |
+| **Human** | A T-pose blockout: feet, legs, hips, waist, chest, shoulders, neck, head | 136 |
+
+They are generated procedurally, so there are no extra asset files to download
+and nothing to install. Each one is a *blockout*: shrink wrap it onto the
+sculpt, then cut it down into a proper quad cage by hand. That is the point —
+the tool handles the repetitive fitting, you keep the creative decisions.
+
+The **Human** cage is a real silhouette, not a box. Measured width by height:
+feet 5.6 → legs 6.2 → hips 7.4 → waist 6.5 → chest 6.9 → **shoulders 9.7** →
+neck 3.8 → head 3.9 (in the units of the loaded sculpt).
 
 ### Guide strips
 
