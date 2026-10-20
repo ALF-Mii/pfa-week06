@@ -40,54 +40,86 @@ also ships two test meshes: `TARGET_MESH.fbx` (the sculpt) and `CAGE_MESH.fbx`
 
 ### 2. Install
 
-**Option A — keep it in the repo (recommended).** Skip to step 3 and point Maya at
-the repo path.
+**Option A — put it in Maya's scripts folder (recommended).** After this,
+`import quadwrap` works from anywhere and you never type a path again.
 
-**Option B — make it importable from anywhere.** Copy `quadwrap.py` into your Maya
-scripts folder so `import quadwrap` always works:
+1. Open Maya. In the **Script Editor** (Python tab) run this to find the folder
+   Maya auto-loads scripts from:
 
-```bash
-# Windows
-copy quadwrap.py "%USERPROFILE%\Documents\maya\2027\scripts\"
-```
+   ```python
+   import maya.cmds as cmds
+   print(cmds.internalVar(userScriptDir=True))
+   ```
 
-(Maya auto-loads anything in that folder at startup. On macOS the path is
-`~/Library/Preferences/Autodesk/maya/2027/scripts/`.)
+   It prints a path like `C:/Users/You/Documents/maya/2027/scripts/`.
+
+2. Copy `quadwrap.py` from the repo into that folder — in File Explorer, paste
+   the printed path into the address bar, then drag `quadwrap.py` in.
+3. **Restart Maya** so it picks the file up.
+
+**Option B — leave it in the repo.** You will need the repo's full path in step 3.
+To find it: in File Explorer, open the `pfa-week06` folder, click once in the
+address bar so the full path shows up, and copy it.
+
+> On macOS the scripts folder is `~/Library/Preferences/Autodesk/maya/2027/scripts/`
+> and `cmds.internalVar(userScriptDir=True)` prints it for you the same way.
 
 ### 3. Run it
 
 1. Open **Maya 2027**.
 2. Open the **Script Editor** (`Window > General Editors > Script Editor`) and
    click the **Python** tab.
-3. Paste this and press Enter:
+3. Paste the matching command below and press **Ctrl+Enter**.
+
+   **If you used Option A** (installed into the scripts folder):
+
+   ```python
+   import quadwrap
+   quadwrap.show_ui()
+   ```
+
+   **If you used Option B** (still in the repo) — use forward slashes, and swap
+   in your own path:
 
    ```python
    import sys
-   sys.path.append(r"C:\path\to\pfa-week06")   # <- your clone path
+   sys.path.append(r"C:/Users/You/Documents/pfa-week06")
    import quadwrap
    quadwrap.show_ui()
    ```
 
    The **QuadWrap** window opens.
 
-> If you used Option B you can drop the first two lines and just run
-> `import quadwrap; quadwrap.show_ui()`.
-
 ### 4. Try it on the included assets (60 seconds)
 
-1. `File > Import…` → `TARGET_MESH.fbx`  (the sculpt — 5,077 faces)
-2. `File > Import…` → `CAGE_MESH.fbx`    (a blockout cage — 400 faces)
-3. Select **TARGET_MESH** in the viewport → click **Load Target Mesh**.
+**Load the two meshes.** Either use the menu — `File > Import…`, pick
+`TARGET_MESH.fbx`, then repeat for `CAGE_MESH.fbx` — or paste this into the
+Script Editor (change `repo` to your own folder):
+
+```python
+import maya.cmds as cmds
+repo = r"C:/Users/You/Documents/pfa-week06"
+cmds.file(repo + "/TARGET_MESH.fbx", i=True, type="FBX")
+cmds.file(repo + "/CAGE_MESH.fbx", i=True, type="FBX")
+```
+
+**Then drive the tool.**
+
+1. Select **TARGET_MESH** in the viewport → click **Load Target Mesh**.
    The label should now read `target: TARGET_MESH`.
-4. Select **CAGE_MESH** → click **Fit to Surface**.
+2. Select **CAGE_MESH** → click **Fit to Surface**.
    The cage snaps down onto the sculpt, live.
-5. Drag **Projection Strength** left and right — the cage follows in real time.
-6. **Preview** → a ghost/reference copy of the fitted cage.
-7. **Commit** → bakes it to real geometry in one undo step.
-8. **Heat Map (deviation)** → colours the cage green→red by how far it is from
+3. Drag **Projection Strength** left and right — the cage follows in real time.
+4. **Preview** → a ghost/reference copy of the fitted cage.
+5. **Commit** → bakes it to real geometry in one undo step.
+6. **Heat Map (deviation)** → colours the cage green→red by how far it is from
    the sculpt.
-9. **Deform Test (skin)** → binds the result to two test joints and bends them
+7. **Deform Test (skin)** → binds the result to two test joints and bends them
    so you can judge whether the loops hold up.
+
+Expected result: the cage's distance from the sculpt goes from **7.09** to
+**0.00**, and the committed mesh still has **400 faces / 382 verts / 0
+non-manifold edges**.
 
 ### 5. Optional — verify it without opening the UI
 
@@ -95,11 +127,22 @@ copy quadwrap.py "%USERPROFILE%\Documents\maya\2027\scripts\"
 
 ```bash
 "C:\Program Files\Autodesk\Maya2027\bin\mayapy.exe" -c "
-import sys; sys.path.append(r'C:\path\to\pfa-week06')
+import sys; sys.path.append(r'C:/Users/You/Documents/pfa-week06')
 import quadwrap as q
 print('import ok; cmds available:', q.cmds is not None)
 "
 ```
+
+### If something goes wrong
+
+| What you see | Why | Fix |
+|---|---|---|
+| `ModuleNotFoundError: No module named 'quadwrap'` | Maya's Python can't find the file | You skipped step 2, or you installed it but didn't restart Maya. Restart Maya, or paste the `sys.path.append` line. |
+| **Fit to Surface** does nothing | Nothing is selected, or the cage and the target are the same mesh | Select the **cage**, then press Fit. The status line at the bottom of the window tells you what it wants. |
+| The cage moves but only a little | **Projection Strength** is low | Drag it to 1.0. At 0.5 the cage only travels halfway to the sculpt. |
+| The cage snaps somewhere odd | The cage doesn't overlap the sculpt | A shrink wrap projects onto the nearest surface, so the cage has to sit across or around the sculpt — not floating off to one side. |
+| No ghost appears after **Preview** | You haven't pressed **Fit to Surface** first | Preview shows the *fitted* cage, so fit first. |
+| A button does nothing | Read the status line at the bottom of the window | Missing selections and bad inputs are reported as messages, not errors. |
 
 ---
 
